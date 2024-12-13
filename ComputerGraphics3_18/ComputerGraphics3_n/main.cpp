@@ -3,8 +3,11 @@
 #include <vector>
 #include "random.h"
 #include "shaderSourceCode.h"
+#include "crosshair.h"	//--- 크로스헤어 헤더 추가
+#include "pointcrosshair.h"
+#include "emptycrosshair.h"
 
-#define SCREENWIDTH 1980
+#define SCREENWIDTH 1920
 #define SCREENHEIGHT 1080
 
 // 사용자 정의 함수
@@ -37,6 +40,12 @@ bool isDepth = true;
 bool isOrtho = false;
 bool isSolid{};
 
+//--- 크로스헤어 객체 선언
+Crosshair crosshair;	
+PointCrosshair pointCrosshair(glm::vec3(0.0f, 1.0f, 0.0f), 5.0f); // 녹색, 크기 5.0
+EmptyCrosshair emptyCrosshair(glm::vec3(0.0f, 1.0f, 0.0f), 0.02f, 0.005f);
+int crosshairType = 1;
+
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
 	//--- 윈도우 생성하기
@@ -65,6 +74,13 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 	make_shaderProgram(vertexShader, fragmentShader, shaderProgramID);
 	glPointSize(1.f);
 	glLineWidth(5.f);
+
+	// 조준선 초기화
+	crosshair = Crosshair(glm::vec3(1.0f, 1.0f, 1.0f), 0.3f); 
+	crosshair.Init(shaderProgramID); 
+	emptyCrosshair.Init(shaderProgramID);
+	//-------------
+	pointCrosshair.Init(shaderProgramID);
 
 	camera.lockMouse();
 
@@ -135,6 +151,18 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 	for(shape::Cube* cube : cubes)
 		DrawShape(camera, shaderProgramID, vao, vbo, &ebo, *cube, isOrtho);
 
+	// 현재 선택된 조준선 렌더링
+	if (crosshairType == 1) {
+		crosshair.Draw(shaderProgramID, SCREENWIDTH, SCREENHEIGHT); // 기본 십자 조준선
+	}
+	else if (crosshairType == 2) {
+		pointCrosshair.Draw(shaderProgramID, SCREENWIDTH, SCREENHEIGHT); // 점 조준선
+	}
+	else if (crosshairType == 3) {
+		emptyCrosshair.Draw(shaderProgramID, SCREENWIDTH, SCREENHEIGHT);
+
+	}
+
 	// 여기까지-----------------------------------------------
 
 	glutSwapBuffers(); // 화면에 출력하기
@@ -143,6 +171,15 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 void Keyboard(unsigned char key, int x, int y)
 {
 	switch (key) {
+	case '1': // 기본 십자 조준선
+		crosshairType = 1;
+		break;
+	case '2': // 점 조준선
+		crosshairType = 2;
+		break;
+	case '3': // 빈십자 조준선
+		crosshairType = 3;
+		break;
 	case 'i':
 		camera.setIsMouseLocked(false);
 		break;
