@@ -67,6 +67,8 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 
 	// 상태 관리
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);    // 더 가까운 면이 우선
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POLYGON_SMOOTH);
 
@@ -107,8 +109,8 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 	for (int i{}; i < 10; ++i) {
 		for (int j{}; j < 10; ++j) {
 			shape::Cube* cube = new shape::Cube{ "sphere.txt", 0 };
-			cube->Transform_World(glm::vec3(-1.0f + (i * 0.2f), -1.0f + (j * 0.2f), 0.0f));
-			cube->Scale(glm::vec3(0.02f, 0.02f, 0.02));
+			cube->Transform_World(glm::vec3(-1.0f + (i * 0.2f), -1.0f + (j * 0.2f), 0.8f));
+			cube->Scale(glm::vec3(0.1f, 0.1f, 0.1));
 			cubes.push_back(cube);
 		}
 	}
@@ -122,7 +124,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 	glutMouseFunc(Mouse);
 	glutPassiveMotionFunc(PassiveMotion);
 	glutMotionFunc(Motion);
-	glClearColor(1.f, 1.f, 1.f, 1.f); // 바탕색을 ‘backGround’로 지정
+	glClearColor(0.f, 0.f, 0.f, 1.f); // 바탕색을 ‘backGround’로 지정
 	glutMainLoop(); // 이벤트 처리 시작
 }
 
@@ -133,7 +135,7 @@ GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
 
 GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 {
-	glClearColor(1.f, 1.f, 1.f, 1.f); // 바탕색을 ‘backGround’로 지정
+	glClearColor(0.f, 0.f, 0.f, 1.f); // 바탕색을 ‘backGround’로 지정
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 설정된 색으로 전체를 칠하기
 	// 그리기 부분 구현: 그리기 관련 부분이 여기에 포함된다.
 

@@ -117,7 +117,7 @@ void read_obj_file(const char* filename, shape::Model* model) {
 			if (sscanf(line + 2, "%f %f %f", &model->vertices[vertex_index].x,
 				&model->vertices[vertex_index].y,
 				&model->vertices[vertex_index].z) == 3) {
-				std::println("vertex {}: {} {} {}", vertex_index, model->vertices[vertex_index].x, model->vertices[vertex_index].y, model->vertices[vertex_index].z);
+				//std::println("vertex {}: {} {} {}", vertex_index, model->vertices[vertex_index].x, model->vertices[vertex_index].y, model->vertices[vertex_index].z);
 				vertex_index++;
 			}
 		}
@@ -125,39 +125,40 @@ void read_obj_file(const char* filename, shape::Model* model) {
 			if (sscanf(line + 3, "%f %f %f", &model->normals[normal_index].x,
 				&model->normals[normal_index].y,
 				&model->normals[normal_index].z) == 3) {
+				//std::println("normal {}: {} {} {}", normal_index, model->normals[normal_index].x, model->normals[normal_index].y, model->normals[normal_index].z);
 				normal_index++;
 			}
 		}
 		else if (line[0] == 'f' && line[1] == ' ') {
 			unsigned int v1, v2, v3, n1, n2, n3, t1, t2, t3;
 			if (sscanf(line + 2, "%u//%u %u//%u %u//%u", &v1, &n1, &v2, &n2, &v3, &n3) == 6) {
-				std::println("face {} : {} {} {}", face_index, v1, v2, v3);
+				//std::println("face {} : {} {} {}", face_index, v1, v2, v3);
 				model->faces[face_index].v1 = v1 - 1;  // OBJ indices are 1-based, subtract 1
 				model->faces[face_index].v2 = v2 - 1;
 				model->faces[face_index].v3 = v3 - 1;
-				//model->faces[face_index].n1 = n1 - 1;
-				//model->faces[face_index].n2 = n2 - 1;
-				//model->faces[face_index].n3 = n3 - 1;
+				model->faces[face_index].n1 = n1 - 1;
+				model->faces[face_index].n2 = n2 - 1;
+				model->faces[face_index].n3 = n3 - 1;
 				face_index++;
 			}
 			else if (sscanf(line + 2, "%u %u %u", &v1, &v2, &v3) == 3) {
-				std::println("face {} : {} {} {}", face_index, v1, v2, v3);
+				//std::println("face {} : {} {} {}", face_index, v1, v2, v3);
 				model->faces[face_index].v1 = v1 - 1;  // OBJ indices are 1-based, subtract 1
 				model->faces[face_index].v2 = v2 - 1;
 				model->faces[face_index].v3 = v3 - 1;
-				//model->faces[face_index].n1 = n1 - 1;
-				//model->faces[face_index].n2 = n2 - 1;
-				//model->faces[face_index].n3 = n3 - 1;
+				model->faces[face_index].n1 = n1 - 1;
+				model->faces[face_index].n2 = n2 - 1;
+				model->faces[face_index].n3 = n3 - 1;
 				face_index++;
 			}
-			else if (sscanf(line + 2, "%u/%u/%u %u/%u/%u %u/%u/%u", &v1, &n1, &t1, &v2, &n2, &t2, &v3, &n3, &t3) == 9) {
-				std::println("face {} : {} {} {}", face_index, v1, v2, v3);
+			else if (sscanf(line + 2, "%u/%u/%u %u/%u/%u %u/%u/%u", &v1, &t1, &n1, &v2, &t2, &n2, &v3, &t3, &n3) == 9) {
+				//std::println("face {} : {} {} {}", face_index, v1, v2, v3);
 				model->faces[face_index].v1 = v1 - 1;  // OBJ indices are 1-based, subtract 1
 				model->faces[face_index].v2 = v2 - 1;
 				model->faces[face_index].v3 = v3 - 1;
-				//model->faces[face_index].n1 = n1 - 1;
-				//model->faces[face_index].n2 = n2 - 1;
-				//model->faces[face_index].n3 = n3 - 1;
+				model->faces[face_index].n1 = n1 - 1;
+				model->faces[face_index].n2 = n2 - 1;
+				model->faces[face_index].n3 = n3 - 1;
 				face_index++;
 			}
 		}
@@ -262,6 +263,7 @@ void InitBuffer(GLuint& shaderID, GLuint& vao, GLuint* vbo, shape::DefaultShape 
 	glGenBuffers(2, vbo); //--- 2개의 VBO를 지정하고 할당하기
 	//--- 1번째 VBO를 활성화하여 바인드하고, 버텍스 속성 (좌표값)을 저장
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+
 	//--- 변수 diamond 에서 버텍스 데이터 값을 버퍼에 복사한다.
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 10, defaultShape.vertex, GL_STATIC_DRAW);
 	//--- 좌표값을 attribute 인덱스 0번에 명시한다
@@ -276,6 +278,22 @@ void InitBuffer(GLuint& shaderID, GLuint& vao, GLuint* vbo, shape::DefaultShape 
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	//--- attribute 인덱스 1번을 사용 가능하게 함.
 	glEnableVertexAttribArray(1);
+
+	glGenVertexArrays(1, &vao); //--- VAO 를 지정하고 할당하기
+
+	glBindVertexArray(vao); //--- VAO를 바인드하기
+
+	glGenBuffers(2, vbo); //--- 2개의 VBO를 지정하고 할당하기
+	//--- 1번째 VBO를 활성화하여 바인드하고, 버텍스 속성 (좌표값)을 저장
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+
+	glUseProgram(shaderID);
+	int lightPosLocation = glGetUniformLocation(shaderID, "lightPos"); //--- lightColor 값 전달: (1.0, 1.0, 1.0) 백색
+	glUniform3f(lightPosLocation, 1.0, 1.0, 1.0);
+	int lightColorLocation = glGetUniformLocation(shaderID, "lightColor"); //--- object Color값 전달: (1.0, 0.5, 0.3)의 색
+	glUniform3f(lightColorLocation, 1.0, 1.0, 1.0);
+	unsigned int objColorLocation = glGetUniformLocation(shaderID, "objectColor"); //--- object Color값 전달: (1.0, 0.5, 0.3)의 색
+	glUniform3f(objColorLocation, 1.0, 1.0, 1.0);
 }
 
 void InitBuffer(GLuint& shaderID, GLuint& vao, GLuint* vbo, GLuint* ebo, shape::Cube defaultShape)
@@ -300,11 +318,19 @@ void InitBuffer(GLuint& shaderID, GLuint& vao, GLuint* vbo, GLuint* ebo, shape::
 	//--- 2번째 VBO를 활성화 하여 바인드 하고, 버텍스 속성 (색상)을 저장
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 	//--- 변수 colors에서 버텍스 색상을 복사한다.
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * defaultShape.model.vertex_count, defaultShape.color, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * defaultShape.model.vertex_count, defaultShape.model.normals, GL_STATIC_DRAW);
 	//--- 색상값을 attribute 인덱스 1번에 명시한다
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	//--- attribute 인덱스 1번을 사용 가능하게 함.
 	glEnableVertexAttribArray(1);
+
+	glUseProgram(shaderID);
+	int lightPosLocation = glGetUniformLocation(shaderID, "lightPos"); //---lightPos 값 전달: (0.0, 0.0, 5.0);
+	glUniform3f(lightPosLocation, 0.0, 0.0, -5.0);
+	int lightColorLocation = glGetUniformLocation(shaderID, "lightColor"); //--- lightColor 값 전달: (1.0, 1.0, 1.0) 백색
+	glUniform3f(lightColorLocation, 1.0, 1.0, 1.0);
+	unsigned int objColorLocation = glGetUniformLocation(shaderID, "objectColor"); //--- object Color값 전달: (1.0, 0.5, 0.3)의 색
+	glUniform3f(objColorLocation, defaultShape.color->x, defaultShape.color->y, defaultShape.color->z);
 }
 
 void SetCamera(shape::Camera camera, GLuint& shaderID, bool isOrtho)
@@ -396,7 +422,7 @@ void DrawShape(shape::Camera camera, GLuint& shaderID, GLuint& vao, GLuint* vbo,
 	glm::mat4 temp = defaultShape.transform_change * defaultShape.rotation_mom * defaultShape.rotation_world * defaultShape.transform_world * defaultShape.rotation_self * defaultShape.transform_self * defaultShape.scale;
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(temp)); //--- modelTransform 변수에 변환 값 적용하기
 	glBindVertexArray(vao);
-	glDrawElements(GL_TRIANGLES, 3 * defaultShape.model.face_count, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLE_FAN, 3 * defaultShape.model.face_count, GL_UNSIGNED_INT, 0);
 }
 
 void DrawShape_Face(shape::Camera camera, GLuint& shaderID, GLuint& vao, GLuint* vbo, GLuint* ebo, shape::Cube defaultShape, int faceNum, bool isOrtho)

@@ -34,7 +34,7 @@ namespace shape
 
 	typedef struct {
 		unsigned int v1, v2, v3;  // Vertex indices
-		//unsigned int n1, n2, n3;  // Normal indices
+		unsigned int n1, n2, n3;  // Normal indices
 		//unsigned int t1, t2, t3;
 	} Face;
 
